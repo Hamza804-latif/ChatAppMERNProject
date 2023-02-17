@@ -4,11 +4,13 @@ const cors = require("cors");
 const database = require("./database/config.js");
 const app = express();
 const PORT = process.env.PORT || 5000;
+const userRoutes = require("./routes/userRoutes.js");
 
 const NodeServer = async () => {
   await database();
   app.use(cors());
   app.use(express.json());
+  app.use("/api/auth", userRoutes);
   try {
     app.listen(8000, () => {
       console.log(`Server is live on http://localhost:${PORT}`);
