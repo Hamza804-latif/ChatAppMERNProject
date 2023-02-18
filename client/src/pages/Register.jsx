@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Logo from "../assets/logo.svg";
@@ -21,6 +21,11 @@ const Register = () => {
     draggable: true,
     theme: "dark",
   };
+  useEffect(() => {
+    if (localStorage.getItem("chat-app-user")) {
+      navigate("/");
+    }
+  }, [navigate]);
   const HandleSubmit = async (event) => {
     event.preventDefault();
     if (HandleValidation()) {
@@ -33,10 +38,7 @@ const Register = () => {
         });
         if (data?.status === 201) {
           toast.success(data?.msg, toastOptions);
-          localStorage.setItem(
-            "chat-app-user",
-            JSON.stringify(data?.data?.username)
-          );
+          localStorage.setItem("chat-app-user", JSON.stringify(data?.data));
           navigate("/login");
         }
         if (data?.status === 401) {
