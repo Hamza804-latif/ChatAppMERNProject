@@ -1,28 +1,19 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import styled from "styled-components";
 import Contacts from "../components/Contacts";
+import Welcome from "../components/Welcome";
 import { allUsers } from "../utils/APIs";
 
 const Chat = () => {
   const [contacts, setContacts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentChat, setCurrentChat] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!localStorage.getItem("chat-app-user")) {
-      navigate("/login");
-    } else {
-      GetCurrentUser();
-    }
-  }, []);
-  useEffect(() => {
-    GetContacts();
-  }, []);
-  const GetContacts = async () => {
-    console.log("get con");
+  const GetContacts = useCallback(async () => {
     console.log("curr", currentUser);
 
     if (currentUser) {
@@ -30,6 +21,11 @@ const Chat = () => {
         try {
           const { data } = await axios.get(`${allUsers}/${currentUser?._id}`);
           console.log("data", data);
+          if (data.status === 200) {
+            setContacts(data.data);
+          } else {
+            toast.error(data.msg, ToastContainer);
+          }
         } catch (error) {
           return toast.error(error.message);
         }
@@ -37,16 +33,35 @@ const Chat = () => {
         navigate("/setAvatar");
       }
     }
-  };
+  }, [currentUser, navigate]);
   const GetCurrentUser = async () => {
     let local = await JSON.parse(localStorage.getItem("chat-app-user"));
     console.log("get curr", local);
     setCurrentUser(local);
   };
+  const ChatChange = (chat) => {
+    setCurrentChat(chat);
+  };
+
+  useEffect(() => {
+    if (!localStorage.getItem("chat-app-user")) {
+      navigate("/login");
+    } else {
+      GetCurrentUser();
+    }
+  }, [navigate]);
+  useEffect(() => {
+    GetContacts();
+  }, [GetContacts]);
   return (
     <Container>
       <div className="container">
-        <Contacts contacts={contacts} />
+        <Contacts
+          contacts={contacts}
+          currentUser={currentUser}
+          changeChat={ChatChange}
+        />
+        <Welcome currentUser={currentUser} />
       </div>
     </Container>
   );

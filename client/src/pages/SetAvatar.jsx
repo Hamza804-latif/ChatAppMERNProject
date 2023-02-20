@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import styled from "styled-components";
@@ -24,25 +24,30 @@ const SetAvatar = () => {
     if (!localStorage.getItem("chat-app-user")) {
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
   const setProfilePicture = async () => {
     if (!selectedAvatars) {
       return toast.error("Please select profile picture", toastOptions);
     } else {
       try {
         const user = await JSON.parse(localStorage.getItem("chat-app-user"));
-        const { data } = await axios.post(`${setAvatar}/${user._id}`, {
-          image: avatars[selectedAvatars],
-        });
-        if (data.status === 201) {
-          toast.success(data.msg, toastOptions);
-          user.isAvatarImageSet = true;
-          user.avatarImage = data.data.image;
-          localStorage.setItem("chat-app-user", JSON.stringify(user));
-          navigate("/");
+        console.log(user);
+        if (user) {
+          const { data } = await axios.post(`${setAvatar}/${user._id}`, {
+            image: avatars[selectedAvatars],
+          });
+          if (data.status === 201) {
+            toast.success(data.msg, toastOptions);
+            user.isAvatarImageSet = true;
+            user.avatarImage = data.data.image;
+            localStorage.setItem("chat-app-user", JSON.stringify(user));
+            navigate("/");
+          }
+        } else {
+          navigate("/login");
         }
       } catch (error) {
-        return toast.error(error.message, toastOptions);
+        return toast.error(error.response.msg, toastOptions);
       }
     }
   };
