@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import styled from "styled-components";
+import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 import { allUsers } from "../utils/APIs";
@@ -61,7 +62,11 @@ const Chat = () => {
           currentUser={currentUser}
           changeChat={ChatChange}
         />
-        <Welcome currentUser={currentUser} />
+        {currentChat ? (
+          <ChatContainer currentChat={currentChat} />
+        ) : (
+          <Welcome currentUser={currentUser} />
+        )}
       </div>
     </Container>
   );
