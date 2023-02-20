@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 
 module.exports.register = async (req, resp) => {
   try {
-    console.log("req.body", req.body);
     const { username, email, password } = req.body;
     const usernameCheck = await registerModel.findOne({ username });
     if (usernameCheck) {
