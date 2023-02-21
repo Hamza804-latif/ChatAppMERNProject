@@ -2,7 +2,6 @@ const messageModel = require("../database/models/messageModel.js");
 
 module.exports.addMsg = async (req, resp) => {
   try {
-    console.log("in routes", req.body);
     const { from, to, message } = req.body;
     const data = await messageModel.create({
       messages: { text: message },
