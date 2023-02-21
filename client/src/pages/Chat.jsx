@@ -1,27 +1,31 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import styled from "styled-components";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
-import { allUsers } from "../utils/APIs";
+import { allUsers, host } from "../utils/APIs";
+import { io } from "socket.io-client";
 
 const Chat = () => {
+  const socket = useRef();
   const [contacts, setContacts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentChat, setCurrentChat] = useState(null);
   const navigate = useNavigate();
 
-  const GetContacts = useCallback(async () => {
-    console.log("curr", currentUser);
+  useEffect(() => {
+    socket.current = io(host);
+    socket.current.emit("add-user", currentUser?._id);
+  }, [currentUser]);
 
+  const GetContacts = useCallback(async () => {
     if (currentUser) {
       if (currentUser?.isAvatarImageSet) {
         try {
           const { data } = await axios.get(`${allUsers}/${currentUser?._id}`);
-          console.log("data", data);
           if (data.status === 200) {
             setContacts(data.data);
           } else {
@@ -37,7 +41,6 @@ const Chat = () => {
   }, [currentUser, navigate]);
   const GetCurrentUser = async () => {
     let local = await JSON.parse(localStorage.getItem("chat-app-user"));
-    console.log("get curr", local);
     setCurrentUser(local);
   };
   const ChatChange = (chat) => {
@@ -63,7 +66,11 @@ const Chat = () => {
           changeChat={ChatChange}
         />
         {currentChat ? (
-          <ChatContainer currentChat={currentChat} currentUser={currentUser} />
+          <ChatContainer
+            currentChat={currentChat}
+            currentUser={currentUser}
+            socket={socket}
+          />
         ) : (
           <Welcome currentUser={currentUser} />
         )}

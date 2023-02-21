@@ -31,7 +31,6 @@ const SetAvatar = () => {
     } else {
       try {
         const user = await JSON.parse(localStorage.getItem("chat-app-user"));
-        console.log(user);
         if (user) {
           const { data } = await axios.post(`${setAvatar}/${user._id}`, {
             image: avatars[selectedAvatars],
